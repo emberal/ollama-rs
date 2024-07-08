@@ -10,7 +10,7 @@ use serde_json::{json, Map, Value};
 use std::collections::HashMap;
 use std::sync::Arc;
 
-pub fn convert_to_openai_tool(tool: &Arc<dyn Tool>) -> Value {
+pub fn convert_to_openai_tool(tool: &Arc<dyn Tool + Send + Sync>) -> Value {
     let mut function = HashMap::new();
     function.insert("name".to_string(), Value::String(tool.name()));
     function.insert("description".to_string(), Value::String(tool.description()));
@@ -48,7 +48,7 @@ impl NousFunctionCall {
         &self,
         model_name: String,
         tool_params: Value,
-        tool: Arc<dyn Tool>,
+        tool: Arc<dyn Tool + Send + Sync>,
     ) -> Result<ChatMessageResponse, ChatMessageResponse> {
         let result = tool.run(tool_params).await;
         match result {
@@ -89,7 +89,7 @@ impl RequestParserBase for NousFunctionCall {
         &self,
         input: &str,
         model_name: String,
-        tools: Vec<Arc<dyn Tool>>,
+        tools: Vec<Arc<dyn Tool + Send + Sync>>,
     ) -> Result<ChatMessageResponse, ChatMessageResponse> {
         //Extract between <tool_call> and </tool_call>
         let tool_response = self.extract_tool_call(input);
@@ -137,7 +137,7 @@ impl RequestParserBase for NousFunctionCall {
         format!("Agent iteration to assist with user query: {}", response)
     }
 
-    async fn get_system_message(&self, tools: &[Arc<dyn Tool>]) -> ChatMessage {
+    async fn get_system_message(&self, tools: &[Arc<dyn Tool + Send + Sync>]) -> ChatMessage {
         let tools_info: Vec<Value> = tools.iter().map(convert_to_openai_tool).collect();
         let tools_json = serde_json::to_string(&tools_info).unwrap();
         let system_message_content = DEFAULT_SYSTEM_TEMPLATE.replace("{tools}", &tools_json);

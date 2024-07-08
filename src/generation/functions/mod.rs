@@ -31,7 +31,7 @@ impl crate::Ollama {
     pub async fn send_function_call_with_history(
         &mut self,
         request: FunctionCallRequest,
-        parser: Arc<dyn RequestParserBase>,
+        parser: Arc<dyn RequestParserBase + Send + Sync>,
         id: String,
     ) -> Result<ChatMessageResponse, OllamaError> {
         let mut request = request;
@@ -80,7 +80,7 @@ impl crate::Ollama {
     pub async fn send_function_call(
         &self,
         request: FunctionCallRequest,
-        parser: Arc<dyn RequestParserBase>,
+        parser: Arc<dyn RequestParserBase + Send + Sync>,
     ) -> Result<ChatMessageResponse, OllamaError> {
         let mut request = request;
 

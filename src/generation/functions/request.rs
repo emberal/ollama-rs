@@ -7,11 +7,11 @@ use std::sync::Arc;
 #[derive(Clone)]
 pub struct FunctionCallRequest {
     pub chat: ChatMessageRequest,
-    pub tools: Vec<Arc<dyn Tool>>,
+    pub tools: Vec<Arc<dyn Tool + Send + Sync>>,
 }
 
 impl FunctionCallRequest {
-    pub fn new(model_name: String, tools: Vec<Arc<dyn Tool>>, messages: Vec<ChatMessage>) -> Self {
+    pub fn new(model_name: String, tools: Vec<Arc<dyn Tool + Send + Sync>>, messages: Vec<ChatMessage>) -> Self {
         let chat = ChatMessageRequest::new(model_name, messages);
         Self { chat, tools }
     }
